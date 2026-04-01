@@ -1,0 +1,24 @@
+Log Redesign Test Results
+=========================
+
+The new log design is working great! Key observations:
+
+1. SUMMARY BAR: Shows at the top with "Rodadas ATK: 10", "Empates: 1", "Rodadas DEF: 15", "Total Perdas ATK: 49", "Total Perdas DEF: 24"
+
+2. LOG ENTRIES: Each entry is a card with:
+   - Round number on the left (gold color)
+   - Dice shown as colored squares (red for ATK, green for DEF)
+   - Winner dice are highlighted with brighter background
+   - Loss badges on the right showing "-3 ATK" or "-2 DEF" etc.
+   - Troop count at bottom right (e.g., "16 x 33")
+   - Left border colored: red = ATK won, green = DEF won, gold = draw
+
+3. VISUAL QUALITY: Much better than before - you can immediately see:
+   - Who won each round (left border color)
+   - The dice values clearly
+   - How many each side lost (badges)
+   - Running troop count
+
+4. Everything is responsive and working well.
+
+Ready to push to GitHub!

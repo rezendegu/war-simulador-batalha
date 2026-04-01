@@ -589,28 +589,138 @@
   }
   .log-toggle.open .log-arrow { transform: rotate(180deg); }
   .log-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
-  .log-body.open { max-height: 60vh; }
+  .log-body.open { max-height: 70vh; }
+  .log-summary {
+    display: flex; justify-content: space-around; align-items: center;
+    padding: 10px 14px; margin: 0 14px 10px;
+    background: var(--bg); border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .log-summary-item { text-align: center; }
+  .log-summary-label { font-size: 0.55rem; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+  .log-summary-val { font-family: 'Oswald', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--white); }
+  .log-summary-val.atk-color { color: #fca5a5; }
+  .log-summary-val.def-color { color: #86efac; }
+  .log-summary-val.gold-color { color: var(--gold); }
   .log-content {
-    padding: 0 14px 14px;
-    max-height: 50vh; overflow-y: auto;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.68rem; line-height: 1.8;
+    padding: 0 10px 14px;
+    max-height: 55vh; overflow-y: auto;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.72rem;
     color: var(--text-muted);
   }
-  .log-content::-webkit-scrollbar { width: 4px; }
+  .log-content::-webkit-scrollbar { width: 5px; }
   .log-content::-webkit-scrollbar-track { background: transparent; }
   .log-content::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
   .log-entry {
-    padding: 3px 0;
-    border-bottom: 1px solid rgba(30,41,59,0.5);
-    display: flex; gap: 6px; align-items: flex-start;
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 8px;
+    margin-bottom: 4px;
+    border-radius: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
   }
-  .log-entry:last-child { border-bottom: none; }
-  .log-round { flex-shrink: 0; color: var(--gold); font-weight: 700; min-width: 30px; }
-  .log-dice-atk { color: #fca5a5; }
-  .log-dice-def { color: #86efac; }
-  .log-winner-atk { color: #ef4444; font-weight: 700; }
-  .log-winner-def { color: #22c55e; font-weight: 700; }
+  .log-entry:hover { border-color: var(--border-light); }
+  .log-entry.atk-won { border-left: 3px solid var(--red); }
+  .log-entry.def-won { border-left: 3px solid var(--green); }
+  .log-entry.draw-round { border-left: 3px solid var(--gold); }
+  .log-round-num {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-align: center;
+  }
+  .log-center {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .log-dice-group {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+  }
+  .log-die {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px; height: 24px;
+    border-radius: 5px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .log-die.atk-die {
+    background: rgba(239,68,68,0.15);
+    color: #fca5a5;
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+  .log-die.def-die {
+    background: rgba(34,197,94,0.15);
+    color: #86efac;
+    border: 1px solid rgba(34,197,94,0.3);
+  }
+  .log-die.winner-die {
+    box-shadow: 0 0 6px rgba(255,255,255,0.15);
+  }
+  .log-die.atk-die.winner-die {
+    background: rgba(239,68,68,0.35);
+    border-color: rgba(239,68,68,0.6);
+  }
+  .log-die.def-die.winner-die {
+    background: rgba(34,197,94,0.35);
+    border-color: rgba(34,197,94,0.6);
+  }
+  .log-vs {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .log-result {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .log-losses {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .log-loss-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    font-family: 'Oswald', sans-serif;
+  }
+  .log-loss-badge.atk-loss {
+    background: rgba(239,68,68,0.12);
+    color: #ef4444;
+  }
+  .log-loss-badge.def-loss {
+    background: rgba(34,197,94,0.12);
+    color: #22c55e;
+  }
+  .log-loss-badge .loss-icon { font-size: 0.6rem; }
+  .log-troops {
+    font-size: 0.58rem;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+  .log-troops .troop-atk { color: #fca5a5; }
+  .log-troops .troop-def { color: #86efac; }
 
   @media (max-width: 400px) {
     .header h1 { font-size: 1.8rem; }
@@ -757,6 +867,28 @@
         <span class="log-arrow">&#9660;</span>
       </button>
       <div class="log-body" id="logBody">
+        <div class="log-summary" id="logSummary" style="display:none">
+          <div class="log-summary-item">
+            <div class="log-summary-label">Rodadas ATK</div>
+            <div class="log-summary-val atk-color" id="logSumAtkWins">0</div>
+          </div>
+          <div class="log-summary-item">
+            <div class="log-summary-label">Empates</div>
+            <div class="log-summary-val gold-color" id="logSumDraws">0</div>
+          </div>
+          <div class="log-summary-item">
+            <div class="log-summary-label">Rodadas DEF</div>
+            <div class="log-summary-val def-color" id="logSumDefWins">0</div>
+          </div>
+          <div class="log-summary-item">
+            <div class="log-summary-label">Total Perdas ATK</div>
+            <div class="log-summary-val atk-color" id="logSumAtkLost">0</div>
+          </div>
+          <div class="log-summary-item">
+            <div class="log-summary-label">Total Perdas DEF</div>
+            <div class="log-summary-val def-color" id="logSumDefLost">0</div>
+          </div>
+        </div>
         <div class="log-content" id="logContent"></div>
       </div>
     </div>
@@ -1416,18 +1548,77 @@ function renderRollingDice(ac, dc) {
   diceSection.innerHTML = html;
 }
 
+// Log summary counters
+let logStats = { atkWins: 0, defWins: 0, draws: 0, totalAtkLost: 0, totalDefLost: 0 };
+const logSummary = $('logSummary');
+const logSumAtkWins = $('logSumAtkWins');
+const logSumDefWins = $('logSumDefWins');
+const logSumDraws = $('logSumDraws');
+const logSumAtkLost = $('logSumAtkLost');
+const logSumDefLost = $('logSumDefLost');
+
+function updateLogSummary() {
+  logSummary.style.display = 'flex';
+  logSumAtkWins.textContent = logStats.atkWins;
+  logSumDefWins.textContent = logStats.defWins;
+  logSumDraws.textContent = logStats.draws;
+  logSumAtkLost.textContent = logStats.totalAtkLost;
+  logSumDefLost.textContent = logStats.totalDefLost;
+}
+
 function addLog(round, atkDice, defDice, atkLost, defLost) {
   S.logs.push({ round, atkDice:[...atkDice], defDice:[...defDice], atkLost, defLost });
+
+  // Determine round winner
+  let roundClass = 'draw-round';
+  if (defLost > atkLost) { roundClass = 'atk-won'; logStats.atkWins++; }
+  else if (atkLost > defLost) { roundClass = 'def-won'; logStats.defWins++; }
+  else if (atkLost === defLost && atkLost > 0) {
+    // Both lost equal — check if net is draw
+    roundClass = 'draw-round'; logStats.draws++;
+  } else { logStats.draws++; }
+  logStats.totalAtkLost += atkLost;
+  logStats.totalDefLost += defLost;
+
+  // Compare dice pairs to highlight winners
+  const pairs = Math.min(atkDice.length, defDice.length);
+  const atkWinDie = [], defWinDie = [];
+  for (let i = 0; i < pairs; i++) {
+    if (atkDice[i] > defDice[i]) { atkWinDie.push(i); }
+    else { defWinDie.push(i); }
+  }
+
+  const atkDiceHtml = atkDice.map((d, i) => {
+    const win = atkWinDie.includes(i) ? ' winner-die' : '';
+    return `<span class="log-die atk-die${win}">${d}</span>`;
+  }).join('');
+
+  const defDiceHtml = defDice.map((d, i) => {
+    const win = defWinDie.includes(i) ? ' winner-die' : '';
+    return `<span class="log-die def-die${win}">${d}</span>`;
+  }).join('');
+
+  let lossesHtml = '';
+  if (atkLost > 0) lossesHtml += `<span class="log-loss-badge atk-loss"><span class="loss-icon">&#9876;</span> -${atkLost} ATK</span>`;
+  if (defLost > 0) lossesHtml += `<span class="log-loss-badge def-loss"><span class="loss-icon">&#9876;</span> -${defLost} DEF</span>`;
+
   const div = document.createElement('div');
-  div.className = 'log-entry';
-  const aStr = atkDice.map(d=>`<span class="log-dice-atk">${d}</span>`).join(' ');
-  const dStr = defDice.map(d=>`<span class="log-dice-def">${d}</span>`).join(' ');
-  let res = '';
-  if(atkLost>0) res += `<span class="log-winner-def">ATK-${atkLost}</span> `;
-  if(defLost>0) res += `<span class="log-winner-atk">DEF-${defLost}</span>`;
-  div.innerHTML = `<span class="log-round">#${round}</span><span>${aStr} vs ${dStr} &rarr; ${res} <span style="color:#4a5568">(${S.atkTroops}x${S.defTroops})</span></span>`;
+  div.className = `log-entry ${roundClass}`;
+  div.innerHTML = `
+    <div class="log-round-num">${round}</div>
+    <div class="log-center">
+      <div class="log-dice-group">${atkDiceHtml}</div>
+      <span class="log-vs">VS</span>
+      <div class="log-dice-group">${defDiceHtml}</div>
+    </div>
+    <div class="log-result">
+      <div class="log-losses">${lossesHtml}</div>
+      <div class="log-troops"><span class="troop-atk">${S.atkTroops}</span> x <span class="troop-def">${S.defTroops}</span></div>
+    </div>
+  `;
   logContent.appendChild(div);
   logContent.scrollTop = logContent.scrollHeight;
+  updateLogSummary();
 }
 
 // ===== SIMULATE =====
@@ -1569,6 +1760,8 @@ battleBtn.addEventListener('click', () => {
   S.atkMin = atkMin;
   S.round = 0; S.logs = [];
   logContent.innerHTML = '';
+  logStats = { atkWins: 0, defWins: 0, draws: 0, totalAtkLost: 0, totalDefLost: 0 };
+  logSummary.style.display = 'none';
 
   atkDot.style.background = getHex(S.atkColor);
   defDot.style.background = getHex(S.defColor);

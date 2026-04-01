@@ -1,0 +1,18 @@
+Test Results:
+- Page loads correctly with dark theme
+- Color selection works (vermelho vs azul)
+- Troop inputs work (100 vs 100)
+- Speed selection works (Rápida)
+- Battle simulation ran correctly: 50 rounds, Defensor won with 50 troops remaining
+- Dice display shows correctly with colored dice
+- Progress bar shows proportions correctly
+- Stats show: 99 ATK losses, 50 rounds, 50 DEF losses
+- Log shows detailed entries with round numbers, dice values, and results
+- Result banner shows "DEFENSOR RESISTIU!" with correct details
+- Nova Batalha button visible
+- Log is expandable/collapsible
+
+Issues noticed:
+- The attacker only had 2 dice on last round (4,1) because only 2 troops left - CORRECT behavior
+- The progress bar and scores update properly
+- Everything looks good!
