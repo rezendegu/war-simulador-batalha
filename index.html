@@ -96,6 +96,20 @@
   .attacker .setup-label { color: var(--red); }
   .defender .setup-label { color: var(--green); }
 
+  /* Dynamic player colors - set via JS */
+  :root {
+    --atk-hex: #e74c3c;
+    --atk-bg: rgba(231,76,60,0.15);
+    --atk-bg-strong: rgba(231,76,60,0.35);
+    --atk-border: rgba(231,76,60,0.3);
+    --atk-border-strong: rgba(231,76,60,0.6);
+    --def-hex: #3498db;
+    --def-bg: rgba(52,152,219,0.15);
+    --def-bg-strong: rgba(52,152,219,0.35);
+    --def-border: rgba(52,152,219,0.3);
+    --def-border-strong: rgba(52,152,219,0.6);
+  }
+
   .vs-divider {
     display: flex;
     align-items: center;
@@ -514,12 +528,12 @@
     font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.6;
   }
   .result-banner.atk-wins {
-    background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(239,68,68,0.04));
-    border-color: rgba(239,68,68,0.3); color: #fca5a5;
+    background: linear-gradient(135deg, var(--atk-bg), transparent);
+    border-color: var(--atk-border); color: var(--atk-hex);
   }
   .result-banner.def-wins {
-    background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(34,197,94,0.04));
-    border-color: rgba(34,197,94,0.3); color: #86efac;
+    background: linear-gradient(135deg, var(--def-bg), transparent);
+    border-color: var(--def-border); color: var(--def-hex);
   }
   .result-banner.stopped {
     background: linear-gradient(135deg, rgba(212,168,67,0.12), rgba(212,168,67,0.04));
@@ -599,8 +613,8 @@
   .log-summary-item { text-align: center; }
   .log-summary-label { font-size: 0.55rem; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
   .log-summary-val { font-family: 'Oswald', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--white); }
-  .log-summary-val.atk-color { color: #fca5a5; }
-  .log-summary-val.def-color { color: #86efac; }
+  .log-summary-val.atk-color { color: var(--atk-hex); }
+  .log-summary-val.def-color { color: var(--def-hex); }
   .log-summary-val.gold-color { color: var(--gold); }
   .log-content {
     padding: 0 10px 14px;
@@ -625,8 +639,8 @@
     transition: border-color 0.2s;
   }
   .log-entry:hover { border-color: var(--border-light); }
-  .log-entry.atk-won { border-left: 3px solid var(--red); }
-  .log-entry.def-won { border-left: 3px solid var(--green); }
+  .log-entry.atk-won { border-left: 3px solid var(--atk-hex); }
+  .log-entry.def-won { border-left: 3px solid var(--def-hex); }
   .log-entry.draw-round { border-left: 3px solid var(--gold); }
   .log-round-num {
     font-family: 'Oswald', sans-serif;
@@ -657,25 +671,25 @@
     font-weight: 700;
   }
   .log-die.atk-die {
-    background: rgba(239,68,68,0.15);
-    color: #fca5a5;
-    border: 1px solid rgba(239,68,68,0.3);
+    background: var(--atk-bg);
+    color: var(--atk-hex);
+    border: 1px solid var(--atk-border);
   }
   .log-die.def-die {
-    background: rgba(34,197,94,0.15);
-    color: #86efac;
-    border: 1px solid rgba(34,197,94,0.3);
+    background: var(--def-bg);
+    color: var(--def-hex);
+    border: 1px solid var(--def-border);
   }
   .log-die.winner-die {
-    box-shadow: 0 0 6px rgba(255,255,255,0.15);
+    box-shadow: 0 0 6px rgba(255,255,255,0.2);
   }
   .log-die.atk-die.winner-die {
-    background: rgba(239,68,68,0.35);
-    border-color: rgba(239,68,68,0.6);
+    background: var(--atk-bg-strong);
+    border-color: var(--atk-border-strong);
   }
   .log-die.def-die.winner-die {
-    background: rgba(34,197,94,0.35);
-    border-color: rgba(34,197,94,0.6);
+    background: var(--def-bg-strong);
+    border-color: var(--def-border-strong);
   }
   .log-vs {
     font-size: 0.6rem;
@@ -705,12 +719,12 @@
     font-family: 'Oswald', sans-serif;
   }
   .log-loss-badge.atk-loss {
-    background: rgba(239,68,68,0.12);
-    color: #ef4444;
+    background: var(--atk-bg);
+    color: var(--atk-hex);
   }
   .log-loss-badge.def-loss {
-    background: rgba(34,197,94,0.12);
-    color: #22c55e;
+    background: var(--def-bg);
+    color: var(--def-hex);
   }
   .log-loss-badge .loss-icon { font-size: 0.6rem; }
   .log-troops {
@@ -719,8 +733,8 @@
     font-family: 'JetBrains Mono', monospace;
     letter-spacing: 0.5px;
   }
-  .log-troops .troop-atk { color: #fca5a5; }
-  .log-troops .troop-def { color: #86efac; }
+  .log-troops .troop-atk { color: var(--atk-hex); }
+  .log-troops .troop-def { color: var(--def-hex); }
 
   @media (max-width: 400px) {
     .header h1 { font-size: 1.8rem; }
@@ -794,7 +808,7 @@
         <div class="score-player">
           <div class="score-dot" id="atkDot"></div>
           <div class="score-info">
-            <div class="score-role" style="color:var(--red)">Atacante</div>
+            <div class="score-role" id="atkRoleLabel">Atacante</div>
             <div class="score-count" id="atkScore">50</div>
           </div>
         </div>
@@ -805,7 +819,7 @@
         <div class="score-player" style="text-align:right;flex-direction:row-reverse;">
           <div class="score-dot" id="defDot"></div>
           <div class="score-info">
-            <div class="score-role" style="color:var(--green)">Defensor</div>
+            <div class="score-role" id="defRoleLabel">Defensor</div>
             <div class="score-count" id="defScore">50</div>
           </div>
         </div>
@@ -976,6 +990,46 @@ logToggle.addEventListener('click',()=>{
 // ===== HELPERS =====
 function getHex(name){ return WAR_COLORS.find(c=>c.name===name)?.hex||'#888'; }
 function isDark(name){ return WAR_COLORS.find(c=>c.name===name)?.dark||false; }
+
+// Convert hex to rgba helper
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// Set dynamic CSS variables for player colors
+function setPlayerColorVars() {
+  const root = document.documentElement;
+  const atkHex = getHex(S.atkColor);
+  const defHex = getHex(S.defColor);
+  // isDark means the color has good contrast on dark bg already (branco, amarelo, verde)
+  // Non-dark colors (preto, vermelho, azul) need lightening for visibility on dark bg
+  const atkLight = isDark(S.atkColor) ? atkHex : lightenColor(atkHex, 0.4);
+  const defLight = isDark(S.defColor) ? defHex : lightenColor(defHex, 0.4);
+  root.style.setProperty('--atk-hex', atkLight);
+  root.style.setProperty('--atk-bg', hexToRgba(atkHex, 0.15));
+  root.style.setProperty('--atk-bg-strong', hexToRgba(atkHex, 0.35));
+  root.style.setProperty('--atk-border', hexToRgba(atkHex, 0.3));
+  root.style.setProperty('--atk-border-strong', hexToRgba(atkHex, 0.6));
+  root.style.setProperty('--def-hex', defLight);
+  root.style.setProperty('--def-bg', hexToRgba(defHex, 0.15));
+  root.style.setProperty('--def-bg-strong', hexToRgba(defHex, 0.35));
+  root.style.setProperty('--def-border', hexToRgba(defHex, 0.3));
+  root.style.setProperty('--def-border-strong', hexToRgba(defHex, 0.6));
+}
+
+// Lighten a hex color for dark backgrounds
+function lightenColor(hex, amount) {
+  let r = parseInt(hex.slice(1,3),16);
+  let g = parseInt(hex.slice(3,5),16);
+  let b = parseInt(hex.slice(5,7),16);
+  r = Math.min(255, Math.round(r + (255-r)*amount));
+  g = Math.min(255, Math.round(g + (255-g)*amount));
+  b = Math.min(255, Math.round(b + (255-b)*amount));
+  return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+}
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 // Crypto-secure random: uses Web Crypto API (same standard used in online casinos/games)
 function secureRandom(max) {
@@ -1559,11 +1613,17 @@ const logSumDefLost = $('logSumDefLost');
 
 function updateLogSummary() {
   logSummary.style.display = 'flex';
+  const atkHex = getHex(S.atkColor);
+  const defHex = getHex(S.defColor);
   logSumAtkWins.textContent = logStats.atkWins;
+  logSumAtkWins.style.color = atkHex;
   logSumDefWins.textContent = logStats.defWins;
+  logSumDefWins.style.color = defHex;
   logSumDraws.textContent = logStats.draws;
   logSumAtkLost.textContent = logStats.totalAtkLost;
+  logSumAtkLost.style.color = atkHex;
   logSumDefLost.textContent = logStats.totalDefLost;
+  logSumDefLost.style.color = defHex;
 }
 
 function addLog(round, atkDice, defDice, atkLost, defLost) {
@@ -1588,22 +1648,39 @@ function addLog(round, atkDice, defDice, atkLost, defLost) {
     else { defWinDie.push(i); }
   }
 
+  const atkHex = getHex(S.atkColor);
+  const defHex = getHex(S.defColor);
+  const atkTextColor = isDark(S.atkColor) ? '#111' : '#fff';
+  const defTextColor = isDark(S.defColor) ? '#111' : '#fff';
+
   const atkDiceHtml = atkDice.map((d, i) => {
-    const win = atkWinDie.includes(i) ? ' winner-die' : '';
-    return `<span class="log-die atk-die${win}">${d}</span>`;
+    const win = atkWinDie.includes(i);
+    const bg = win ? hexToRgba(atkHex, 0.85) : hexToRgba(atkHex, 0.5);
+    const border = win ? hexToRgba(atkHex, 0.9) : hexToRgba(atkHex, 0.6);
+    const shadow = win ? `box-shadow:0 0 8px ${hexToRgba(atkHex, 0.5)};` : '';
+    return `<span class="log-die" style="background:${bg};color:${atkTextColor};border:1px solid ${border};${shadow}">${d}</span>`;
   }).join('');
 
   const defDiceHtml = defDice.map((d, i) => {
-    const win = defWinDie.includes(i) ? ' winner-die' : '';
-    return `<span class="log-die def-die${win}">${d}</span>`;
+    const win = defWinDie.includes(i);
+    const bg = win ? hexToRgba(defHex, 0.85) : hexToRgba(defHex, 0.5);
+    const border = win ? hexToRgba(defHex, 0.9) : hexToRgba(defHex, 0.6);
+    const shadow = win ? `box-shadow:0 0 8px ${hexToRgba(defHex, 0.5)};` : '';
+    return `<span class="log-die" style="background:${bg};color:${defTextColor};border:1px solid ${border};${shadow}">${d}</span>`;
   }).join('');
 
   let lossesHtml = '';
-  if (atkLost > 0) lossesHtml += `<span class="log-loss-badge atk-loss"><span class="loss-icon">&#9876;</span> -${atkLost} ATK</span>`;
-  if (defLost > 0) lossesHtml += `<span class="log-loss-badge def-loss"><span class="loss-icon">&#9876;</span> -${defLost} DEF</span>`;
+  if (atkLost > 0) lossesHtml += `<span class="log-loss-badge" style="background:${hexToRgba(atkHex,0.15)};color:${atkHex}"><span class="loss-icon">&#9876;</span> -${atkLost} ATK</span>`;
+  if (defLost > 0) lossesHtml += `<span class="log-loss-badge" style="background:${hexToRgba(defHex,0.15)};color:${defHex}"><span class="loss-icon">&#9876;</span> -${defLost} DEF</span>`;
+
+  // Border color based on round winner
+  let borderColor = 'var(--gold)';
+  if (roundClass === 'atk-won') borderColor = atkHex;
+  else if (roundClass === 'def-won') borderColor = defHex;
 
   const div = document.createElement('div');
-  div.className = `log-entry ${roundClass}`;
+  div.className = 'log-entry';
+  div.style.borderLeft = `3px solid ${borderColor}`;
   div.innerHTML = `
     <div class="log-round-num">${round}</div>
     <div class="log-center">
@@ -1613,7 +1690,7 @@ function addLog(round, atkDice, defDice, atkLost, defLost) {
     </div>
     <div class="log-result">
       <div class="log-losses">${lossesHtml}</div>
-      <div class="log-troops"><span class="troop-atk">${S.atkTroops}</span> x <span class="troop-def">${S.defTroops}</span></div>
+      <div class="log-troops"><span style="color:${atkHex}">${S.atkTroops}</span> x <span style="color:${defHex}">${S.defTroops}</span></div>
     </div>
   `;
   logContent.appendChild(div);
@@ -1718,12 +1795,18 @@ function showResult(type) {
   const defName = S.defColor.charAt(0).toUpperCase() + S.defColor.slice(1);
 
   if (type === 'atk') {
-    resultBanner.className = 'result-banner visible atk-wins';
-    resultTitle.textContent = 'Atacante Venceu!';
+    resultBanner.className = 'result-banner visible';
+    resultBanner.style.background = `linear-gradient(135deg, ${hexToRgba(getHex(S.atkColor),0.15)}, transparent)`;
+    resultBanner.style.borderColor = hexToRgba(getHex(S.atkColor),0.4);
+    resultBanner.style.color = getHex(S.atkColor);
+    resultTitle.textContent = `${atkName} Venceu!`;
     resultDesc.textContent = `${atkName} conquistou o território em ${S.round} rodadas.`;
   } else if (type === 'def') {
-    resultBanner.className = 'result-banner visible def-wins';
-    resultTitle.textContent = 'Defensor Resistiu!';
+    resultBanner.className = 'result-banner visible';
+    resultBanner.style.background = `linear-gradient(135deg, ${hexToRgba(getHex(S.defColor),0.15)}, transparent)`;
+    resultBanner.style.borderColor = hexToRgba(getHex(S.defColor),0.4);
+    resultBanner.style.color = getHex(S.defColor);
+    resultTitle.textContent = `${defName} Resistiu!`;
     resultDesc.textContent = `${defName} defendeu o território em ${S.round} rodadas.`;
   } else if (type === 'min') {
     resultBanner.className = 'result-banner visible stopped';
@@ -1763,12 +1846,21 @@ battleBtn.addEventListener('click', () => {
   logStats = { atkWins: 0, defWins: 0, draws: 0, totalAtkLost: 0, totalDefLost: 0 };
   logSummary.style.display = 'none';
 
+  // Set dynamic color CSS variables for entire UI
+  setPlayerColorVars();
+
   atkDot.style.background = getHex(S.atkColor);
   defDot.style.background = getHex(S.defColor);
   progressAtk.style.background = getHex(S.atkColor);
   progressDef.style.background = getHex(S.defColor);
   progressAtk.style.color = isDark(S.atkColor)?'#111':'#fff';
   progressDef.style.color = isDark(S.defColor)?'#111':'#fff';
+
+  // Update role labels with player colors
+  const atkRoleLabel = $('atkRoleLabel');
+  const defRoleLabel = $('defRoleLabel');
+  if (atkRoleLabel) atkRoleLabel.style.color = getHex(S.atkColor);
+  if (defRoleLabel) defRoleLabel.style.color = getHex(S.defColor);
 
   if (S.atkMin === null) minIndicator.classList.remove('visible');
   updateScores();
@@ -1786,6 +1878,9 @@ continueBtn.addEventListener('click', () => {
   // Continue the battle - reset min or let user adjust
   resultBanner.classList.remove('visible');
   resultBanner.className = 'result-banner';
+  resultBanner.style.background = '';
+  resultBanner.style.borderColor = '';
+  resultBanner.style.color = '';
   continueBtn.classList.remove('visible');
   newBtn.classList.remove('visible');
 
@@ -1803,6 +1898,9 @@ newBtn.addEventListener('click', () => {
   setupPanel.style.display = '';
   resultBanner.classList.remove('visible');
   resultBanner.className = 'result-banner';
+  resultBanner.style.background = '';
+  resultBanner.style.borderColor = '';
+  resultBanner.style.color = '';
   newBtn.classList.remove('visible');
   stopBtn.classList.remove('visible');
   continueBtn.classList.remove('visible');

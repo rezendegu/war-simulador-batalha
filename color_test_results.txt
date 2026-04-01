@@ -1,0 +1,21 @@
+Dynamic Color Test Results - Amarelo (ATK) vs Verde (DEF)
+==========================================================
+
+CONFIRMED WORKING:
+1. Score section: "ATACANTE" label in yellow, "DEFENSOR" label in green - CORRECT
+2. Progress bar: Yellow for ATK, Green for DEF - CORRECT
+3. Score dots: Yellow and Green - CORRECT
+4. Result banner: "VERDE RESISTIU!" in green background/text - CORRECT
+5. Result stats: ATK value in yellow, DEF value in green - CORRECT
+
+LOG - CONFIRMED WORKING:
+1. Summary bar: "RODADAS ATK: 4" in yellow, "RODADAS DEF: 18" in green, "TOTAL PERDAS ATK: 49" in yellow, "TOTAL PERDAS DEF: 17" in green - CORRECT
+2. Log dice: ATK dice shown in yellow, DEF dice shown in green - CORRECT
+3. Winner dice have glow effect in their respective color - CORRECT
+4. Loss badges: "-3 ATK" in yellow, "-1 DEF" in green - CORRECT
+5. Troop counts: ATK count in yellow, DEF count in green - CORRECT
+6. Border left: Yellow for ATK-won rounds, Green for DEF-won rounds - CORRECT
+7. Soldier animation: Yellow soldier vs Green soldier - CORRECT
+8. Victory: Green soldier dancing, yellow soldier fallen - CORRECT
+
+ALL DYNAMIC COLORS WORKING PERFECTLY!
