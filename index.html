@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>WAR — Simulador de Batalha</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #0b0f19;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e293b;
+    --border-light: #2d3a50;
+    --gold: #d4a843;
+    --gold-dim: rgba(212,168,67,0.15);
+    --text: #e2e8f0;
+    --text-muted: #8896ab;
+    --white: #ffffff;
+    --red: #ef4444;
+    --green: #22c55e;
+    --war-branco: #e8e8e8;
+    --war-preto: #2a2a2a;
+    --war-amarelo: #f5c542;
+    --war-verde: #2ecc71;
+    --war-vermelho: #e74c3c;
+    --war-azul: #3498db;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    text-align: center;
+    padding: 24px 16px 14px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(212,168,67,0.06) 0%, transparent 100%);
+  }
+  .header h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    letter-spacing: 6px;
+    background: linear-gradient(135deg, #d4a843, #f0d78c, #d4a843);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px 16px 40px;
+  }
+
+  /* ===== SETUP PANEL ===== */
+  .setup-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .versus-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .player-setup { padding: 18px 14px; }
+  .player-setup.attacker { border-right: 1px solid var(--border); }
+
+  .setup-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .attacker .setup-label { color: var(--red); }
+  .defender .setup-label { color: var(--green); }
+
+  .vs-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    background: var(--surface2);
+  }
+  .vs-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+  }
+
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .color-btn {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .color-btn:hover { transform: scale(1.08); }
+  .color-btn.selected {
+    border-color: var(--gold);
+    box-shadow: 0 0 12px rgba(212,168,67,0.4);
+  }
+  .color-btn.disabled { opacity: 0.2; pointer-events: none; }
+  .color-btn .color-name {
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    position: absolute;
+    bottom: 2px;
+    color: rgba(255,255,255,0.8);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+  .color-btn[data-color="branco"] .color-name,
+  .color-btn[data-color="amarelo"] .color-name { color: rgba(0,0,0,0.5); text-shadow: none; }
+
+  .color-btn[data-color="branco"]   { background: var(--war-branco); }
+  .color-btn[data-color="preto"]    { background: var(--war-preto); }
+  .color-btn[data-color="amarelo"]  { background: var(--war-amarelo); }
+  .color-btn[data-color="verde"]    { background: var(--war-verde); }
+  .color-btn[data-color="vermelho"] { background: var(--war-vermelho); }
+  .color-btn[data-color="azul"]     { background: var(--war-azul); }
+
+  .troop-input-wrap { position: relative; margin-bottom: 10px; }
+  .troop-input-wrap label {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .troop-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--white);
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+  }
+  .troop-input::-webkit-outer-spin-button,
+  .troop-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .troop-input:focus { border-color: var(--gold); }
+
+  /* Min troops field */
+  .min-troops-wrap {
+    position: relative;
+    margin-top: 6px;
+  }
+  .min-troops-wrap label {
+    display: block;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    margin-bottom: 3px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .min-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 8px;
+    color: #fca5a5;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+    -moz-appearance: textfield;
+  }
+  .min-input::-webkit-outer-spin-button,
+  .min-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .min-input:focus { border-color: var(--red); }
+  .min-hint {
+    font-size: 0.55rem;
+    color: rgba(252,165,165,0.5);
+    text-align: center;
+    margin-top: 3px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Speed & Battle */
+  .speed-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px 0;
+  }
+  .speed-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .speed-btns { display: flex; gap: 4px; }
+  .speed-btn {
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .speed-btn.active {
+    background: var(--gold-dim);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .battle-btn-wrap { padding: 14px 16px; border-top: 1px solid var(--border); }
+  .battle-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s;
+    background: linear-gradient(135deg, #d4a843, #b8922e);
+    color: #0b0f19;
+  }
+  .battle-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(212,168,67,0.3); }
+  .battle-btn:active { transform: translateY(0); }
+  .battle-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* ===== ARENA ===== */
+  .arena { margin-top: 16px; display: none; }
+  .arena.visible { display: block; }
+
+  /* ===== BATTLE ANIMATION CANVAS ===== */
+  .battle-stage {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .battle-stage canvas {
+    width: 100%;
+    height: 220px;
+    display: block;
+  }
+
+  /* ===== SCORE ===== */
+  .score-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 14px;
+    margin-bottom: 14px;
+  }
+
+  .score-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .score-player { display: flex; align-items: center; gap: 8px; }
+  .score-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .score-info .score-role {
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .score-info .score-count {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  .round-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 12px;
+    text-align: center;
+  }
+  .round-badge .round-label {
+    font-size: 0.5rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .round-badge .round-num {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 28px;
+    background: var(--bg);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    border: 1px solid var(--border);
+  }
+  .progress-atk, .progress-def {
+    height: 100%;
+    transition: width 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(0,0,0,0.7);
+    min-width: 24px;
+  }
+
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* Min troops indicator */
+  .min-indicator {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 6px 12px;
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.15);
+    border-radius: 8px;
+    font-size: 0.7rem;
+    color: #fca5a5;
+  }
+  .min-indicator.visible { display: flex; }
+  .min-indicator .min-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--bg);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  .min-indicator .min-bar-fill {
+    height: 100%;
+    background: #ef4444;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .stat-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 6px;
+    text-align: center;
+  }
+  .stat-card .stat-val {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .stat-card .stat-label {
+    font-size: 0.55rem;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 1px;
+  }
+
+  /* ===== DICE ===== */
+  .dice-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 70px;
+  }
+  .dice-group { display: flex; gap: 5px; align-items: center; }
+  .dice {
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.2rem; font-weight: 700;
+    color: var(--bg);
+    transition: all 0.2s;
+  }
+  .dice.rolling { animation: diceRoll 0.12s infinite; }
+  .dice.win { box-shadow: 0 0 10px rgba(34,197,94,0.5); }
+  .dice.lose { opacity: 0.45; }
+
+  @keyframes diceRoll {
+    0%   { transform: rotateZ(0deg) scale(1); }
+    25%  { transform: rotateZ(6deg) scale(1.06); }
+    50%  { transform: rotateZ(0deg) scale(1); }
+    75%  { transform: rotateZ(-6deg) scale(1.06); }
+    100% { transform: rotateZ(0deg) scale(1); }
+  }
+
+  .dice-vs {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.75rem; font-weight: 700;
+    color: var(--text-muted); letter-spacing: 2px;
+  }
+  .dice-placeholder {
+    font-size: 0.75rem; color: var(--text-muted); letter-spacing: 1px;
+  }
+
+  /* ===== RESULT ===== */
+  .result-banner {
+    display: none;
+    text-align: center;
+    padding: 20px 16px;
+    border-radius: 16px;
+    margin-bottom: 14px;
+    border: 1px solid;
+  }
+  .result-banner.visible { display: block; animation: fadeInUp 0.5s ease; }
+  .result-banner h2 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.4rem; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .result-banner p { font-size: 0.8rem; opacity: 0.8; }
+  .result-banner .result-stats {
+    display: flex; justify-content: center; gap: 20px;
+    margin-top: 10px; font-family: 'Oswald', sans-serif;
+  }
+  .result-banner .result-stat {
+    text-align: center;
+  }
+  .result-banner .result-stat .rs-val {
+    font-size: 1.5rem; font-weight: 700;
+  }
+  .result-banner .result-stat .rs-label {
+    font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase; opacity: 0.6;
+  }
+  .result-banner.atk-wins {
+    background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(239,68,68,0.04));
+    border-color: rgba(239,68,68,0.3); color: #fca5a5;
+  }
+  .result-banner.def-wins {
+    background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(34,197,94,0.04));
+    border-color: rgba(34,197,94,0.3); color: #86efac;
+  }
+  .result-banner.stopped {
+    background: linear-gradient(135deg, rgba(212,168,67,0.12), rgba(212,168,67,0.04));
+    border-color: rgba(212,168,67,0.3); color: #fde68a;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== BUTTONS ===== */
+  .action-btns {
+    display: flex; gap: 8px; margin-bottom: 14px;
+  }
+  .stop-btn, .new-btn, .continue-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.9rem; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+    display: none;
+  }
+  .stop-btn {
+    border: 1px solid rgba(239,68,68,0.3);
+    background: rgba(239,68,68,0.08);
+    color: #fca5a5;
+  }
+  .stop-btn:hover { background: rgba(239,68,68,0.15); }
+  .new-btn {
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+  }
+  .new-btn:hover { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+  .continue-btn {
+    border: 1px solid rgba(212,168,67,0.3);
+    background: rgba(212,168,67,0.08);
+    color: var(--gold);
+  }
+  .continue-btn:hover { background: rgba(212,168,67,0.18); }
+  .stop-btn.visible, .new-btn.visible, .continue-btn.visible { display: block; }
+
+  /* ===== LOG ===== */
+  .log-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .log-toggle {
+    width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px;
+    background: none; border: none;
+    color: var(--text); cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem; font-weight: 600;
+  }
+  .log-toggle:hover { background: rgba(255,255,255,0.02); }
+  .log-toggle .log-title { display: flex; align-items: center; gap: 8px; }
+  .log-toggle .log-arrow {
+    transition: transform 0.3s; font-size: 0.75rem; color: var(--text-muted);
+  }
+  .log-toggle.open .log-arrow { transform: rotate(180deg); }
+  .log-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+  .log-body.open { max-height: 60vh; }
+  .log-content {
+    padding: 0 14px 14px;
+    max-height: 50vh; overflow-y: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; line-height: 1.8;
+    color: var(--text-muted);
+  }
+  .log-content::-webkit-scrollbar { width: 4px; }
+  .log-content::-webkit-scrollbar-track { background: transparent; }
+  .log-content::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+  .log-entry {
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(30,41,59,0.5);
+    display: flex; gap: 6px; align-items: flex-start;
+  }
+  .log-entry:last-child { border-bottom: none; }
+  .log-round { flex-shrink: 0; color: var(--gold); font-weight: 700; min-width: 30px; }
+  .log-dice-atk { color: #fca5a5; }
+  .log-dice-def { color: #86efac; }
+  .log-winner-atk { color: #ef4444; font-weight: 700; }
+  .log-winner-def { color: #22c55e; font-weight: 700; }
+
+  @media (max-width: 400px) {
+    .header h1 { font-size: 1.8rem; }
+    .troop-input { font-size: 1.4rem; }
+    .dice { width: 34px; height: 34px; font-size: 1rem; }
+    .score-info .score-count { font-size: 1.2rem; }
+    .battle-stage canvas { height: 180px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>WAR</h1>
+  <p>Simulador de Batalha</p>
+</div>
+
+<div class="container">
+
+  <!-- SETUP -->
+  <div class="setup-panel" id="setupPanel">
+    <div class="versus-row">
+      <div class="player-setup attacker">
+        <div class="setup-label">Atacante</div>
+        <div class="color-grid" id="atkColors"></div>
+        <div class="troop-input-wrap">
+          <label>Tropas</label>
+          <input type="number" class="troop-input" id="atkTroops" min="2" max="9999" value="50">
+        </div>
+        <div class="min-troops-wrap">
+          <label>Parar quando restar</label>
+          <input type="number" class="min-input" id="atkMin" min="1" max="9999" value="" placeholder="--">
+          <div class="min-hint">Deixe vazio para lutar at&eacute; o fim</div>
+        </div>
+      </div>
+      <div class="vs-divider"><span class="vs-text">VS</span></div>
+      <div class="player-setup defender">
+        <div class="setup-label">Defensor</div>
+        <div class="color-grid" id="defColors"></div>
+        <div class="troop-input-wrap">
+          <label>Tropas</label>
+          <input type="number" class="troop-input" id="defTroops" min="1" max="9999" value="50">
+        </div>
+      </div>
+    </div>
+    <div class="speed-row">
+      <span class="speed-label">Velocidade:</span>
+      <div class="speed-btns">
+        <button class="speed-btn" data-speed="slow">Lenta</button>
+        <button class="speed-btn active" data-speed="normal">Normal</button>
+        <button class="speed-btn" data-speed="fast">R&aacute;pida</button>
+        <button class="speed-btn" data-speed="instant">Instant</button>
+      </div>
+    </div>
+    <div class="battle-btn-wrap">
+      <button class="battle-btn" id="battleBtn">Iniciar Batalha</button>
+    </div>
+  </div>
+
+  <!-- ARENA -->
+  <div class="arena" id="arena">
+
+    <!-- BATTLE ANIMATION -->
+    <div class="battle-stage">
+      <canvas id="battleCanvas" width="600" height="220"></canvas>
+    </div>
+
+    <!-- SCORE -->
+    <div class="score-section">
+      <div class="score-header">
+        <div class="score-player">
+          <div class="score-dot" id="atkDot"></div>
+          <div class="score-info">
+            <div class="score-role" style="color:var(--red)">Atacante</div>
+            <div class="score-count" id="atkScore">50</div>
+          </div>
+        </div>
+        <div class="round-badge">
+          <div class="round-label">Rodada</div>
+          <div class="round-num" id="roundNum">0</div>
+        </div>
+        <div class="score-player" style="text-align:right;flex-direction:row-reverse;">
+          <div class="score-dot" id="defDot"></div>
+          <div class="score-info">
+            <div class="score-role" style="color:var(--green)">Defensor</div>
+            <div class="score-count" id="defScore">50</div>
+          </div>
+        </div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-atk" id="progressAtk" style="width:50%">50%</div>
+        <div class="progress-def" id="progressDef" style="width:50%">50%</div>
+      </div>
+      <div class="progress-labels">
+        <span>Atacante</span><span>Defensor</span>
+      </div>
+      <div class="min-indicator" id="minIndicator">
+        <span>Min:</span>
+        <span id="minIndicatorVal">--</span>
+        <div class="min-bar"><div class="min-bar-fill" id="minBarFill" style="width:0%"></div></div>
+        <span id="minIndicatorPct">0%</span>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-val" id="statAtkLost">0</div>
+          <div class="stat-label">Perdas ATK</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="statRounds">0</div>
+          <div class="stat-label">Rodadas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="statDefLost">0</div>
+          <div class="stat-label">Perdas DEF</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DICE -->
+    <div class="dice-section" id="diceSection">
+      <span class="dice-placeholder">Os dados aparecem aqui...</span>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="action-btns">
+      <button class="stop-btn" id="stopBtn">Parar</button>
+      <button class="continue-btn" id="continueBtn">Continuar Atacando</button>
+      <button class="new-btn" id="newBtn">Nova Batalha</button>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-banner" id="resultBanner">
+      <h2 id="resultTitle"></h2>
+      <p id="resultDesc"></p>
+      <div class="result-stats" id="resultStats"></div>
+    </div>
+
+    <!-- LOG -->
+    <div class="log-section">
+      <button class="log-toggle" id="logToggle">
+        <span class="log-title">
+          <span>&#128220;</span><span>Log da Batalha</span>
+        </span>
+        <span class="log-arrow">&#9660;</span>
+      </button>
+      <div class="log-body" id="logBody">
+        <div class="log-content" id="logContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== CONSTANTS =====
+const WAR_COLORS = [
+  { name:'branco',   hex:'#e8e8e8', dark:true },
+  { name:'preto',    hex:'#2a2a2a', dark:false },
+  { name:'amarelo',  hex:'#f5c542', dark:true },
+  { name:'verde',    hex:'#2ecc71', dark:true },
+  { name:'vermelho', hex:'#e74c3c', dark:false },
+  { name:'azul',     hex:'#3498db', dark:false },
+];
+
+const speeds = { slow:500, normal:180, fast:40, instant:0 };
+
+// ===== STATE =====
+let S = {
+  atkColor:null, defColor:null,
+  atkTroops:50, defTroops:50,
+  atkInitial:50, defInitial:50,
+  atkMin: null,
+  round:0, running:false, stopped:false, finished:false,
+  speed:'normal', logs:[],
+  lastRoundWinner: null, // 'atk' or 'def'
+};
+
+// ===== DOM =====
+const $=id=>document.getElementById(id);
+const battleBtn=$('battleBtn'), setupPanel=$('setupPanel'), arena=$('arena');
+const atkScoreEl=$('atkScore'), defScoreEl=$('defScore'), roundNumEl=$('roundNum');
+const progressAtk=$('progressAtk'), progressDef=$('progressDef');
+const diceSection=$('diceSection');
+const resultBanner=$('resultBanner'), resultTitle=$('resultTitle'), resultDesc=$('resultDesc'), resultStats=$('resultStats');
+const stopBtn=$('stopBtn'), newBtn=$('newBtn'), continueBtn=$('continueBtn');
+const logToggle=$('logToggle'), logBody=$('logBody'), logContent=$('logContent');
+const statAtkLost=$('statAtkLost'), statDefLost=$('statDefLost'), statRounds=$('statRounds');
+const atkDot=$('atkDot'), defDot=$('defDot');
+const minIndicator=$('minIndicator'), minIndicatorVal=$('minIndicatorVal');
+const minBarFill=$('minBarFill'), minIndicatorPct=$('minIndicatorPct');
+const canvas=$('battleCanvas'), ctx=canvas.getContext('2d');
+
+// ===== COLOR PICKERS =====
+function buildColors(el, side) {
+  WAR_COLORS.forEach(c => {
+    const b = document.createElement('button');
+    b.className='color-btn'; b.dataset.color=c.name; b.dataset.side=side;
+    b.innerHTML=`<span class="color-name">${c.name}</span>`;
+    b.addEventListener('click',()=>{ S[side+'Color']=c.name; updateColorUI(); });
+    el.appendChild(b);
+  });
+}
+buildColors($('atkColors'),'atk');
+buildColors($('defColors'),'def');
+
+function updateColorUI() {
+  $('atkColors').querySelectorAll('.color-btn').forEach(b=>{
+    b.classList.toggle('selected',b.dataset.color===S.atkColor);
+    b.classList.toggle('disabled',b.dataset.color===S.defColor);
+  });
+  $('defColors').querySelectorAll('.color-btn').forEach(b=>{
+    b.classList.toggle('selected',b.dataset.color===S.defColor);
+    b.classList.toggle('disabled',b.dataset.color===S.atkColor);
+  });
+}
+S.atkColor='vermelho'; S.defColor='azul'; updateColorUI();
+
+// Speed
+document.querySelectorAll('.speed-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.speed-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); S.speed=b.dataset.speed;
+  });
+});
+
+// Log toggle
+logToggle.addEventListener('click',()=>{
+  logToggle.classList.toggle('open');
+  logBody.classList.toggle('open');
+});
+
+// ===== HELPERS =====
+function getHex(name){ return WAR_COLORS.find(c=>c.name===name)?.hex||'#888'; }
+function isDark(name){ return WAR_COLORS.find(c=>c.name===name)?.dark||false; }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+// Crypto-secure random: uses Web Crypto API (same standard used in online casinos/games)
+function secureRandom(max) {
+  const arr = new Uint32Array(1);
+  crypto.getRandomValues(arr);
+  return arr[0] % max;
+}
+function rollDie() { return secureRandom(6) + 1; }
+function rollDice(n){ const d=[]; for(let i=0;i<n;i++) d.push(rollDie()); return d.sort((a,b)=>b-a); }
+
+// ===== SOLDIER ANIMATION =====
+// Simple stick-figure soldiers drawn on canvas
+let animFrame = null;
+let animState = 'idle'; // idle, fighting, victory-atk, victory-def, stopped
+let animTick = 0;
+let sparks = [];
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width = rect.width * 2;
+  canvas.height = (window.innerWidth <= 400 ? 180 : 220) * 2;
+  canvas.style.height = (window.innerWidth <= 400 ? 180 : 220) + 'px';
+}
+
+function drawSoldier(x, y, color, facing, frame, scale) {
+  const s = scale || 1;
+  const f = facing; // 1=right, -1=left
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(s, s);
+
+  const bounce = Math.sin(frame * 0.15) * 3;
+  const armSwing = Math.sin(frame * 0.2) * 0.5;
+  const legSwing = Math.sin(frame * 0.2) * 0.4;
+
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.beginPath();
+  ctx.ellipse(0, 48, 14, 4, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.translate(0, bounce);
+
+  // Body
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // Legs
+  ctx.beginPath();
+  ctx.moveTo(0, 18);
+  ctx.lineTo(-8 + Math.sin(frame*0.2)*6, 44);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0, 18);
+  ctx.lineTo(8 - Math.sin(frame*0.2)*6, 44);
+  ctx.stroke();
+
+  // Torso
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0, 20);
+  ctx.stroke();
+
+  // Arms
+  ctx.beginPath();
+  ctx.moveTo(0, 6);
+  ctx.lineTo(f * (14 + Math.cos(frame*0.2)*4), 10 + Math.sin(frame*0.25)*6);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0, 6);
+  ctx.lineTo(f * (-4), 18 + Math.sin(frame*0.18)*4);
+  ctx.stroke();
+
+  // Sword in front hand
+  ctx.strokeStyle = '#c0c0c0';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  const sx = f * (14 + Math.cos(frame*0.2)*4);
+  const sy = 10 + Math.sin(frame*0.25)*6;
+  ctx.moveTo(sx, sy);
+  ctx.lineTo(sx + f*16, sy - 12 + Math.sin(frame*0.3)*8);
+  ctx.stroke();
+
+  // Shield in back hand
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.5;
+  const shx = f * (-4);
+  const shy = 18 + Math.sin(frame*0.18)*4;
+  ctx.beginPath();
+  ctx.arc(shx + f*(-6), shy, 7, 0, Math.PI*2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Head
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(0, -8, 9, 0, Math.PI*2);
+  ctx.fill();
+
+  // Helmet
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.beginPath();
+  ctx.arc(0, -10, 10, Math.PI, 0);
+  ctx.fill();
+
+  // Eyes
+  ctx.fillStyle = isDark(S.atkColor) && color === getHex(S.atkColor) ? '#111' :
+                  isDark(S.defColor) && color === getHex(S.defColor) ? '#111' : '#fff';
+  ctx.beginPath();
+  ctx.arc(f*3, -8, 2, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawFightingSoldier(x, y, color, facing, frame, scale) {
+  const s = scale || 1;
+  const f = facing;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(s, s);
+
+  const lunge = Math.sin(frame * 0.35) * 8;
+  const armAttack = Math.sin(frame * 0.35);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.beginPath();
+  ctx.ellipse(f*lunge*0.3, 48, 14, 4, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.translate(f * lunge * 0.3, Math.abs(Math.sin(frame*0.35))*-4);
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+
+  // Legs (wider stance)
+  ctx.beginPath();
+  ctx.moveTo(0, 18);
+  ctx.lineTo(-10 + f*4, 44);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0, 18);
+  ctx.lineTo(10 + f*4, 44);
+  ctx.stroke();
+
+  // Torso (leaning forward)
+  ctx.beginPath();
+  ctx.moveTo(f*2, 0);
+  ctx.lineTo(0, 20);
+  ctx.stroke();
+
+  // Sword arm - attacking!
+  const swordAngle = armAttack * 1.2;
+  const armX = f * 16;
+  const armY = -2 + swordAngle * 14;
+  ctx.beginPath();
+  ctx.moveTo(f*2, 6);
+  ctx.lineTo(armX, armY);
+  ctx.stroke();
+
+  // Sword
+  ctx.strokeStyle = '#e0e0e0';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(armX, armY);
+  ctx.lineTo(armX + f*20, armY - 10 + swordAngle*12);
+  ctx.stroke();
+
+  // Shield arm
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(f*2, 6);
+  ctx.lineTo(f*(-8), 12);
+  ctx.stroke();
+
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.6;
+  ctx.beginPath();
+  ctx.arc(f*(-14), 12, 8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  // Head
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(f*2, -8, 9, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.beginPath();
+  ctx.arc(f*2, -10, 10, Math.PI, 0);
+  ctx.fill();
+
+  // Angry eyes
+  const eyeColor = isDark(S.atkColor) && color === getHex(S.atkColor) ? '#111' :
+                   isDark(S.defColor) && color === getHex(S.defColor) ? '#111' : '#fff';
+  ctx.fillStyle = eyeColor;
+  ctx.beginPath();
+  ctx.arc(f*5, -9, 2.5, 0, Math.PI*2);
+  ctx.fill();
+
+  // Angry eyebrow
+  ctx.strokeStyle = eyeColor;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(f*2, -14);
+  ctx.lineTo(f*8, -12);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawDancingSoldier(x, y, color, frame, scale) {
+  const s = scale || 1;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(s, s);
+
+  const hop = Math.abs(Math.sin(frame * 0.12)) * 16;
+  const sway = Math.sin(frame * 0.08) * 12;
+  const spin = Math.sin(frame * 0.06) * 0.15;
+
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.beginPath();
+  ctx.ellipse(sway*0.3, 48, 12 + Math.abs(Math.sin(frame*0.12))*4, 3, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.translate(sway, -hop);
+  ctx.rotate(spin);
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+
+  // Legs (dancing)
+  ctx.beginPath();
+  ctx.moveTo(0, 18);
+  ctx.lineTo(-10 + Math.sin(frame*0.15)*8, 44 + hop*0.5);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0, 18);
+  ctx.lineTo(10 - Math.sin(frame*0.15)*8, 44 + hop*0.5);
+  ctx.stroke();
+
+  // Torso
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0, 20);
+  ctx.stroke();
+
+  // Arms up celebrating!
+  const armL = Math.sin(frame*0.1) * 0.8;
+  const armR = Math.sin(frame*0.1 + 1.5) * 0.8;
+  ctx.beginPath();
+  ctx.moveTo(0, 6);
+  ctx.lineTo(-16, -10 + armL*10);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0, 6);
+  ctx.lineTo(16, -10 + armR*10);
+  ctx.stroke();
+
+  // Sword raised high
+  ctx.strokeStyle = '#e0e0e0';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(16, -10 + armR*10);
+  ctx.lineTo(20, -30 + armR*8);
+  ctx.stroke();
+
+  // Head
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(0, -8, 9, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.beginPath();
+  ctx.arc(0, -10, 10, Math.PI, 0);
+  ctx.fill();
+
+  // Happy eyes (^ ^)
+  const eyeColor = isDark(S.atkColor) && color === getHex(S.atkColor) ? '#111' :
+                   isDark(S.defColor) && color === getHex(S.defColor) ? '#111' : '#fff';
+  ctx.strokeStyle = eyeColor;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(-3, -8, 3, Math.PI, 0);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(3, -8, 3, Math.PI, 0);
+  ctx.stroke();
+
+  // Smile
+  ctx.beginPath();
+  ctx.arc(0, -4, 4, 0.1, Math.PI - 0.1);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawDeadSoldier(x, y, color, scale) {
+  const s = scale || 1;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(s, s);
+  ctx.globalAlpha = 0.4;
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+
+  // Lying down
+  ctx.translate(0, 30);
+  ctx.rotate(-Math.PI/2 * 0.85);
+
+  // Legs
+  ctx.beginPath(); ctx.moveTo(0,18); ctx.lineTo(-8,44); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,18); ctx.lineTo(8,44); ctx.stroke();
+  // Torso
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,20); ctx.stroke();
+  // Arms
+  ctx.beginPath(); ctx.moveTo(0,6); ctx.lineTo(-12,16); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,6); ctx.lineTo(12,14); ctx.stroke();
+  // Head
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.arc(0,-8,9,0,Math.PI*2); ctx.fill();
+  // X eyes
+  ctx.strokeStyle = isDark(S.atkColor) && color===getHex(S.atkColor) ? '#111' :
+                    isDark(S.defColor) && color===getHex(S.defColor) ? '#111' : '#fff';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(-2,-10); ctx.lineTo(2,-6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(2,-10); ctx.lineTo(-2,-6); ctx.stroke();
+
+  ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
+function addSpark(x, y) {
+  for(let i=0; i<3; i++) {
+    sparks.push({
+      x, y,
+      vx: (Math.random()-0.5)*8,
+      vy: (Math.random()-0.5)*8 - 2,
+      life: 20 + Math.random()*15,
+      maxLife: 35,
+      color: ['#fff','#ff0','#f80','#f44'][Math.floor(Math.random()*4)]
+    });
+  }
+}
+
+function drawSparks() {
+  sparks.forEach(s => {
+    const alpha = s.life / s.maxLife;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = s.color;
+    const size = 2 + alpha * 4;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, size, 0, Math.PI*2);
+    ctx.fill();
+    s.x += s.vx;
+    s.y += s.vy;
+    s.vy += 0.3;
+    s.life--;
+  });
+  ctx.globalAlpha = 1;
+  sparks = sparks.filter(s => s.life > 0);
+}
+
+// Confetti for victory
+let confetti = [];
+function spawnConfetti(cx, cy, color) {
+  for(let i=0; i<40; i++) {
+    confetti.push({
+      x: cx, y: cy,
+      vx: (Math.random()-0.5)*12,
+      vy: -Math.random()*10 - 3,
+      rot: Math.random()*Math.PI*2,
+      rotV: (Math.random()-0.5)*0.3,
+      w: 4+Math.random()*6,
+      h: 3+Math.random()*4,
+      color: [color, '#fff', '#ffd700', '#ff6b6b', '#4ecdc4'][Math.floor(Math.random()*5)],
+      life: 120 + Math.random()*60,
+    });
+  }
+}
+
+function drawConfetti() {
+  confetti.forEach(c => {
+    ctx.save();
+    ctx.translate(c.x, c.y);
+    ctx.rotate(c.rot);
+    ctx.globalAlpha = Math.min(1, c.life/30);
+    ctx.fillStyle = c.color;
+    ctx.fillRect(-c.w/2, -c.h/2, c.w, c.h);
+    ctx.restore();
+    c.x += c.vx;
+    c.y += c.vy;
+    c.vy += 0.15;
+    c.vx *= 0.99;
+    c.rot += c.rotV;
+    c.life--;
+  });
+  ctx.globalAlpha = 1;
+  confetti = confetti.filter(c => c.life > 0);
+}
+
+let confettiSpawned = false;
+
+function animLoop() {
+  animTick += 0.3;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Ground line
+  const groundY = canvas.height * 0.82;
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, groundY);
+  ctx.lineTo(canvas.width, groundY);
+  ctx.stroke();
+
+  // Battlefield dust particles
+  ctx.globalAlpha = 0.06;
+  for(let i=0; i<8; i++) {
+    const px = (animTick*1.5 + i*137) % canvas.width;
+    const py = groundY - 20 + Math.sin(animTick*0.06 + i)*10;
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(px, py, 1.5, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  const cx = canvas.width / 2;
+  const cy = groundY - 50;
+  const atkColor = getHex(S.atkColor);
+  const defColor = getHex(S.defColor);
+  const soldierScale = canvas.width < 500 ? 1.6 : 2;
+
+  if (animState === 'fighting') {
+    // Two soldiers fighting
+    drawFightingSoldier(cx - 50*soldierScale/2, cy, atkColor, 1, animTick, soldierScale);
+    drawFightingSoldier(cx + 50*soldierScale/2, cy, defColor, -1, animTick + 8, soldierScale);
+
+    // Sparks at clash point
+    if (Math.floor(animTick * 10) % 18 === 0) {
+      addSpark(cx * 1 + (Math.random()-0.5)*20, cy - 10 + (Math.random()-0.5)*20);
+    }
+    drawSparks();
+
+    // "CLASH" text effect
+    if (Math.floor(animTick) % 40 < 20) {
+      ctx.save();
+      ctx.font = `bold ${14*soldierScale}px Oswald`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(255,200,50,0.15)';
+      ctx.fillText('CLASH!', cx, cy - 50*soldierScale/2);
+      ctx.restore();
+    }
+
+  } else if (animState === 'victory-atk') {
+    // Attacker dances, defender dead
+    drawDancingSoldier(cx - 30*soldierScale/2, cy, atkColor, animTick, soldierScale);
+    drawDeadSoldier(cx + 60*soldierScale/2, cy + 10, defColor, soldierScale);
+    if (!confettiSpawned) { spawnConfetti(cx - 30*soldierScale/2, cy - 40, atkColor); confettiSpawned = true; }
+    drawConfetti();
+
+  } else if (animState === 'victory-def') {
+    // Defender dances, attacker dead
+    drawDancingSoldier(cx + 30*soldierScale/2, cy, defColor, animTick, soldierScale);
+    drawDeadSoldier(cx - 60*soldierScale/2, cy + 10, atkColor, soldierScale);
+    if (!confettiSpawned) { spawnConfetti(cx + 30*soldierScale/2, cy - 40, defColor); confettiSpawned = true; }
+    drawConfetti();
+
+  } else if (animState === 'stopped') {
+    // Both soldiers standing, facing each other, idle
+    drawSoldier(cx - 60*soldierScale/2, cy, atkColor, 1, animTick, soldierScale);
+    drawSoldier(cx + 60*soldierScale/2, cy, defColor, -1, animTick, soldierScale);
+
+    // "PAUSED" text
+    ctx.save();
+    ctx.font = `bold ${12*soldierScale}px Oswald`;
+    ctx.textAlign = 'center';
+    ctx.letterSpacing = '4px';
+    ctx.fillStyle = 'rgba(212,168,67,0.2)';
+    ctx.fillText('BATALHA PAUSADA', cx, cy - 55*soldierScale/2);
+    ctx.restore();
+
+  } else {
+    // Idle - soldiers facing each other
+    drawSoldier(cx - 60*soldierScale/2, cy, atkColor, 1, animTick, soldierScale);
+    drawSoldier(cx + 60*soldierScale/2, cy, defColor, -1, animTick, soldierScale);
+  }
+
+  animFrame = requestAnimationFrame(animLoop);
+}
+
+function startAnim(state) {
+  animState = state;
+  confettiSpawned = false;
+  sparks = [];
+  confetti = [];
+  if (!animFrame) {
+    resizeCanvas();
+    animLoop();
+  }
+}
+
+function stopAnim() {
+  if (animFrame) { cancelAnimationFrame(animFrame); animFrame = null; }
+}
+
+// ===== UI UPDATES =====
+function updateScores() {
+  atkScoreEl.textContent = S.atkTroops;
+  defScoreEl.textContent = S.defTroops;
+  roundNumEl.textContent = S.round;
+  statRounds.textContent = S.round;
+  statAtkLost.textContent = S.atkInitial - S.atkTroops;
+  statDefLost.textContent = S.defInitial - S.defTroops;
+
+  const total = S.atkTroops + S.defTroops;
+  const atkPct = total > 0 ? (S.atkTroops / total * 100) : 50;
+  progressAtk.style.width = atkPct + '%';
+  progressDef.style.width = (100 - atkPct) + '%';
+  progressAtk.textContent = S.atkTroops;
+  progressDef.textContent = S.defTroops;
+
+  // Min indicator
+  if (S.atkMin !== null) {
+    minIndicator.classList.add('visible');
+    minIndicatorVal.textContent = S.atkMin;
+    const range = S.atkInitial - S.atkMin;
+    const used = S.atkInitial - S.atkTroops;
+    const pct = range > 0 ? Math.min(100, (used / range) * 100) : 100;
+    minBarFill.style.width = pct + '%';
+    minIndicatorPct.textContent = Math.round(pct) + '%';
+    if (pct >= 90) minBarFill.style.background = '#ef4444';
+    else if (pct >= 60) minBarFill.style.background = '#f59e0b';
+    else minBarFill.style.background = '#22c55e';
+  }
+}
+
+function renderDice(atkDice, defDice, comparisons) {
+  let html = '<div class="dice-group">';
+  atkDice.forEach((d,i) => {
+    const cls = comparisons&&comparisons[i] ? (comparisons[i]==='atk'?'win':'lose') : '';
+    html += `<div class="dice ${cls}" style="background:${getHex(S.atkColor)};color:${isDark(S.atkColor)?'#111':'#fff'}">${d}</div>`;
+  });
+  html += '</div><div class="dice-vs">VS</div><div class="dice-group">';
+  defDice.forEach((d,i) => {
+    const cls = comparisons&&comparisons[i] ? (comparisons[i]==='def'?'win':'lose') : '';
+    html += `<div class="dice ${cls}" style="background:${getHex(S.defColor)};color:${isDark(S.defColor)?'#111':'#fff'}">${d}</div>`;
+  });
+  html += '</div>';
+  diceSection.innerHTML = html;
+}
+
+function renderRollingDice(ac, dc) {
+  let html = '<div class="dice-group">';
+  for(let i=0;i<ac;i++) html += `<div class="dice rolling" style="background:${getHex(S.atkColor)};color:${isDark(S.atkColor)?'#111':'#fff'}">${rollDie()}</div>`;
+  html += '</div><div class="dice-vs">VS</div><div class="dice-group">';
+  for(let i=0;i<dc;i++) html += `<div class="dice rolling" style="background:${getHex(S.defColor)};color:${isDark(S.defColor)?'#111':'#fff'}">${rollDie()}</div>`;
+  html += '</div>';
+  diceSection.innerHTML = html;
+}
+
+function addLog(round, atkDice, defDice, atkLost, defLost) {
+  S.logs.push({ round, atkDice:[...atkDice], defDice:[...defDice], atkLost, defLost });
+  const div = document.createElement('div');
+  div.className = 'log-entry';
+  const aStr = atkDice.map(d=>`<span class="log-dice-atk">${d}</span>`).join(' ');
+  const dStr = defDice.map(d=>`<span class="log-dice-def">${d}</span>`).join(' ');
+  let res = '';
+  if(atkLost>0) res += `<span class="log-winner-def">ATK-${atkLost}</span> `;
+  if(defLost>0) res += `<span class="log-winner-atk">DEF-${defLost}</span>`;
+  div.innerHTML = `<span class="log-round">#${round}</span><span>${aStr} vs ${dStr} &rarr; ${res} <span style="color:#4a5568">(${S.atkTroops}x${S.defTroops})</span></span>`;
+  logContent.appendChild(div);
+  logContent.scrollTop = logContent.scrollHeight;
+}
+
+// ===== SIMULATE =====
+function simulateRound() {
+  const atkDiceCount = Math.min(3, S.atkTroops - 1);
+  const defDiceCount = Math.min(3, S.defTroops);
+  if (atkDiceCount <= 0 || defDiceCount <= 0) return null;
+
+  const atkDice = rollDice(atkDiceCount);
+  const defDice = rollDice(defDiceCount);
+  const pairs = Math.min(atkDice.length, defDice.length);
+  let atkLost=0, defLost=0;
+  const comparisons = [];
+
+  for(let i=0; i<pairs; i++) {
+    if(atkDice[i] > defDice[i]) { defLost++; comparisons.push('atk'); }
+    else { atkLost++; comparisons.push('def'); }
+  }
+
+  S.atkTroops -= atkLost;
+  S.defTroops -= defLost;
+  S.round++;
+
+  return { atkDice, defDice, atkLost, defLost, comparisons };
+}
+
+// ===== RUN BATTLE =====
+async function runBattle() {
+  S.running = true;
+  S.stopped = false;
+  S.finished = false;
+  stopBtn.classList.add('visible');
+  newBtn.classList.remove('visible');
+  continueBtn.classList.remove('visible');
+  resultBanner.classList.remove('visible');
+  resultBanner.className = 'result-banner';
+  startAnim('fighting');
+
+  const delay = speeds[S.speed];
+
+  while (S.atkTroops > 1 && S.defTroops > 0 && !S.stopped) {
+    // Check min troops limit
+    if (S.atkMin !== null && S.atkTroops <= S.atkMin) {
+      S.stopped = true;
+      S.finished = false;
+      break;
+    }
+
+    const ac = Math.min(3, S.atkTroops - 1);
+    const dc = Math.min(3, S.defTroops);
+
+    if (delay > 0) {
+      renderRollingDice(ac, dc);
+      await sleep(Math.min(delay, 100));
+    }
+
+    const r = simulateRound();
+    if (!r) break;
+
+    renderDice(r.atkDice, r.defDice, r.comparisons);
+    updateScores();
+    addLog(S.round, r.atkDice, r.defDice, r.atkLost, r.defLost);
+
+    if (delay > 0) await sleep(delay);
+  }
+
+  S.running = false;
+  stopBtn.classList.remove('visible');
+
+  const hitMin = S.atkMin !== null && S.atkTroops <= S.atkMin;
+  const defDead = S.defTroops <= 0;
+  const atkDead = S.atkTroops <= 1;
+
+  if (defDead) {
+    S.finished = true;
+    showResult('atk');
+    startAnim('victory-atk');
+  } else if (atkDead) {
+    S.finished = true;
+    showResult('def');
+    startAnim('victory-def');
+  } else if (hitMin) {
+    showResult('min');
+    startAnim('stopped');
+    continueBtn.classList.add('visible');
+  } else if (S.stopped) {
+    showResult('paused');
+    startAnim('stopped');
+    continueBtn.classList.add('visible');
+  }
+  newBtn.classList.add('visible');
+}
+
+function showResult(type) {
+  resultBanner.classList.add('visible');
+  const atkName = S.atkColor.charAt(0).toUpperCase() + S.atkColor.slice(1);
+  const defName = S.defColor.charAt(0).toUpperCase() + S.defColor.slice(1);
+
+  if (type === 'atk') {
+    resultBanner.className = 'result-banner visible atk-wins';
+    resultTitle.textContent = 'Atacante Venceu!';
+    resultDesc.textContent = `${atkName} conquistou o território em ${S.round} rodadas.`;
+  } else if (type === 'def') {
+    resultBanner.className = 'result-banner visible def-wins';
+    resultTitle.textContent = 'Defensor Resistiu!';
+    resultDesc.textContent = `${defName} defendeu o território em ${S.round} rodadas.`;
+  } else if (type === 'min') {
+    resultBanner.className = 'result-banner visible stopped';
+    resultTitle.textContent = 'Limite Atingido!';
+    resultDesc.textContent = `Atacante parou com ${S.atkTroops} tropas (mínimo: ${S.atkMin}).`;
+  } else {
+    resultBanner.className = 'result-banner visible stopped';
+    resultTitle.textContent = 'Batalha Pausada';
+    resultDesc.textContent = `Parado manualmente na rodada ${S.round}.`;
+  }
+
+  resultStats.innerHTML = `
+    <div class="result-stat"><div class="rs-val" style="color:${getHex(S.atkColor)}">${S.atkTroops}</div><div class="rs-label">Atacante</div></div>
+    <div class="result-stat"><div class="rs-val" style="color:var(--gold)">${S.round}</div><div class="rs-label">Rodadas</div></div>
+    <div class="result-stat"><div class="rs-val" style="color:${getHex(S.defColor)}">${S.defTroops}</div><div class="rs-label">Defensor</div></div>
+  `;
+}
+
+// ===== BUTTONS =====
+battleBtn.addEventListener('click', () => {
+  const atk = parseInt($('atkTroops').value);
+  const def = parseInt($('defTroops').value);
+  const minVal = $('atkMin').value.trim();
+  const atkMin = minVal !== '' ? parseInt(minVal) : null;
+
+  if (!S.atkColor || !S.defColor) { alert('Selecione uma cor para cada lado!'); return; }
+  if (isNaN(atk) || atk < 2) { alert('O atacante precisa de pelo menos 2 tropas!'); return; }
+  if (isNaN(def) || def < 1) { alert('O defensor precisa de pelo menos 1 tropa!'); return; }
+  if (atkMin !== null && (isNaN(atkMin) || atkMin < 1)) { alert('O mínimo precisa ser pelo menos 1!'); return; }
+  if (atkMin !== null && atkMin >= atk) { alert('O mínimo precisa ser menor que o total de tropas do atacante!'); return; }
+
+  S.atkTroops = atk; S.defTroops = def;
+  S.atkInitial = atk; S.defInitial = def;
+  S.atkMin = atkMin;
+  S.round = 0; S.logs = [];
+  logContent.innerHTML = '';
+
+  atkDot.style.background = getHex(S.atkColor);
+  defDot.style.background = getHex(S.defColor);
+  progressAtk.style.background = getHex(S.atkColor);
+  progressDef.style.background = getHex(S.defColor);
+  progressAtk.style.color = isDark(S.atkColor)?'#111':'#fff';
+  progressDef.style.color = isDark(S.defColor)?'#111':'#fff';
+
+  if (S.atkMin === null) minIndicator.classList.remove('visible');
+  updateScores();
+
+  setupPanel.style.display = 'none';
+  arena.classList.add('visible');
+  diceSection.innerHTML = '<span class="dice-placeholder">Preparando...</span>';
+
+  setTimeout(()=>runBattle(), 300);
+});
+
+stopBtn.addEventListener('click', () => { S.stopped = true; });
+
+continueBtn.addEventListener('click', () => {
+  // Continue the battle - reset min or let user adjust
+  resultBanner.classList.remove('visible');
+  resultBanner.className = 'result-banner';
+  continueBtn.classList.remove('visible');
+  newBtn.classList.remove('visible');
+
+  // If stopped by min, remove the min limit to continue
+  S.atkMin = null;
+  minIndicator.classList.remove('visible');
+
+  // Update initials for stats (keep cumulative)
+  runBattle();
+});
+
+newBtn.addEventListener('click', () => {
+  stopAnim();
+  arena.classList.remove('visible');
+  setupPanel.style.display = '';
+  resultBanner.classList.remove('visible');
+  resultBanner.className = 'result-banner';
+  newBtn.classList.remove('visible');
+  stopBtn.classList.remove('visible');
+  continueBtn.classList.remove('visible');
+  diceSection.innerHTML = '<span class="dice-placeholder">Os dados aparecem aqui...</span>';
+  logToggle.classList.remove('open');
+  logBody.classList.remove('open');
+  minIndicator.classList.remove('visible');
+});
+
+// Resize canvas on window resize
+window.addEventListener('resize', () => { if(animFrame) resizeCanvas(); });
+</script>
+</body>
+</html>
